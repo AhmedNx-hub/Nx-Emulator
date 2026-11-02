@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0f17" />
+    <meta name="description" content="Nx-Emulator — محاكي NES أوفلاين داخل المتصفح." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <title>Nx-Emulator — Offline NES</title>
+    <script type="module" crossorigin src="./assets/index-D7C0QWOD.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C9WnuUaU.css">
+  </head>
+  <body>
+    <div id="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Nx-Emulator home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-wordmark"><strong>Nx</strong><em>Emulator</em></span>
+        </a>
+        <div class="topbar-actions">
+          <button class="icon-button install-button is-hidden" id="install-button" type="button" aria-label="تثبيت التطبيق" title="تثبيت التطبيق">
+            <span class="icon icon-download" aria-hidden="true"></span>
+          </button>
+          <span class="offline-pill" id="network-pill"><i></i><span>أوفلاين جاهز</span></span>
+          <button class="avatar-button" type="button" aria-label="ملف المستخدم">N</button>
+        </div>
+      </header>
+
+      <div class="app-body">
+        <aside class="sidebar" aria-label="مكتبة الألعاب">
+          <div class="sidebar-heading">
+            <div>
+              <span class="eyebrow">LIBRARY</span>
+              <h2>مكتبتك</h2>
+            </div>
+            <span class="library-count" id="library-count">0</span>
+          </div>
+          <button class="import-button" id="import-button" type="button">
+            <span class="icon icon-plus" aria-hidden="true"></span>
+            <span>استيراد لعبة</span>
+            <kbd>⌘ O</kbd>
+          </button>
+          <input id="rom-input" type="file" accept=".nes,.nes2,.unf,application/octet-stream" hidden />
+          <div class="library-list" id="library-list">
+            <div class="empty-library" id="empty-library">
+              <span class="empty-disc" aria-hidden="true"></span>
+              <p>مكتبتك فارغة</p>
+              <small>استورد لعبة NES من جهازك وابدأ اللعب.</small>
+            </div>
+          </div>
+          <div class="sidebar-footer">
+            <div class="privacy-note">
+              <span class="icon icon-lock" aria-hidden="true"></span>
+              <span>ملفاتك تبقى على هذا الجهاز فقط</span>
+            </div>
+            <p class="version-label">NX CORE <strong>0.1</strong></p>
+          </div>
+        </aside>
+
+        <main class="workspace">
+          <section class="page-intro">
+            <div>
+              <div class="breadcrumb"><span class="status-dot"></span> مساحة اللعب <span>/</span> NES Core</div>
+              <h1>جاهز لجولة <span>8-bit</span>؟</h1>
+              <p>استورد لعبتك، وخلي الذكريات تشتغل من غير إنترنت.</p>
+            </div>
+            <div class="intro-actions">
+              <button class="text-button" id="how-it-works" type="button"><span class="icon icon-info" aria-hidden="true"></span> كيف يعمل؟</button>
+            </div>
+          </section>
+
+          <section class="console-layout" aria-label="وحدة المحاكاة">
+            <div class="player-column">
+              <div class="player-card" id="player-card">
+                <div class="player-card-topline">
+                  <div class="now-playing">
+                    <span class="playing-equalizer" id="playing-equalizer"><i></i><i></i><i></i><i></i></span>
+                    <div>
+                      <span class="label">NOW PLAYING</span>
+                      <strong id="current-game">لم يتم اختيار لعبة</strong>
+                    </div>
+                  </div>
+                  <div class="player-metrics">
+                    <span><i class="metric-live"></i><b id="core-status">STANDBY</b></span>
+                    <span id="fps-label">— FPS</span>
+                  </div>
+                </div>
+
+                <div class="screen-frame" id="screen-frame">
+                  <div class="screen-glow"></div>
+                  <div class="nes-screen" id="nes-screen">
+                    <div class="screen-placeholder" id="screen-placeholder">
+                      <div class="placeholder-orbit"><span>NX</span></div>
+                      <strong>شغّل لعبة NES</strong>
+                      <p>اختار ملف <b>.nes</b> من جهازك للبدء</p>
+                      <button class="placeholder-button" id="placeholder-import" type="button">اختيار لعبة <span class="icon icon-arrow-left" aria-hidden="true"></span></button>
+                    </div>
+                  </div>
+                  <div class="screen-overlay" id="screen-overlay" aria-hidden="true"><span>PAUSED</span></div>
+                </div>
+
+                <div class="player-toolbar">
+                  <div class="transport-controls">
+                    <button class="tool-button primary-tool" id="play-pause" type="button" disabled><span class="icon icon-play" aria-hidden="true"></span><span>تشغيل</span></button>
+                    <button class="tool-button" id="reset-button" type="button" disabled><span class="icon icon-reset" aria-hidden="true"></span><span>إعادة</span></button>
+                    <button class="tool-button" id="save-state" type="button" disabled><span class="icon icon-save" aria-hidden="true"></span><span>حفظ</span></button>
+                    <button class="tool-button" id="load-state" type="button" disabled><span class="icon icon-folder" aria-hidden="true"></span><span>استعادة</span></button>
+                  </div>
+                  <div class="utility-controls">
+                    <button class="circle-tool" id="mute-button" type="button" aria-label="كتم الصوت" title="كتم الصوت" disabled><span class="icon icon-volume" aria-hidden="true"></span></button>
+                    <button class="circle-tool" id="screenshot-button" type="button" aria-label="حفظ لقطة شاشة" title="حفظ لقطة شاشة" disabled><span class="icon icon-camera" aria-hidden="true"></span></button>
+                    <button class="circle-tool" id="fullscreen-button" type="button" aria-label="ملء الشاشة" title="ملء الشاشة" disabled><span class="icon icon-expand" aria-hidden="true"></span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="touch-deck" id="touch-deck" aria-label="أزرار التحكم باللمس">
+                <div class="touch-cluster touch-dpad">
+                  <button data-button="up" class="touch-button dpad-up" aria-label="أعلى"><span class="icon icon-chevron-up"></span></button>
+                  <button data-button="left" class="touch-button dpad-left" aria-label="يسار"><span class="icon icon-chevron-left"></span></button>
+                  <button data-button="right" class="touch-button dpad-right" aria-label="يمين"><span class="icon icon-chevron-right"></span></button>
+                  <button data-button="down" class="touch-button dpad-down" aria-label="أسفل"><span class="icon icon-chevron-down"></span></button>
+                  <span class="dpad-center"></span>
+                </div>
+                <div class="touch-center-buttons">
+                  <button data-button="select" class="mini-touch-button" aria-label="اختيار">SELECT</button>
+                  <button data-button="start" class="mini-touch-button" aria-label="بدء">START</button>
+                </div>
+                <div class="touch-cluster touch-ab">
+                  <button data-button="b" class="action-touch-button button-b" aria-label="زر B"><span>B</span></button>
+                  <button data-button="a" class="action-touch-button button-a" aria-label="زر A"><span>A</span></button>
+                </div>
+              </div>
+            </div>
+
+            <aside class="insights-column">
+              <div class="insight-card system-card">
+                <div class="card-label-row"><span class="card-label">SYSTEM STATUS</span><span class="pulse-mark"></span></div>
+                <div class="system-readout"><span class="system-icon"><span class="icon icon-chip"></span></span><div><strong>NES Core</strong><small id="system-subtitle">جاهز لاستيراد أول لعبة</small></div></div>
+                <div class="readout-bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="status-stats"><span><small>VERSION</small><b>JSNES 2.1.0</b></span><span><small>MODE</small><b>LOCAL</b></span></div>
+              </div>
+
+              <div class="insight-card controls-card">
+                <div class="card-title-row"><div><span class="card-label">CONTROL MAP</span><h3>اختصارات سريعة</h3></div><span class="icon icon-keyboard" aria-hidden="true"></span></div>
+                <div class="key-map"><div><span>الحركة</span><strong><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd></strong></div><div><span>A / B</span><strong><kbd>X</kbd><kbd>Z</kbd></strong></div><div><span>ابدأ / اختيار</span><strong><kbd>Enter</kbd><kbd>Ctrl</kbd></strong></div></div>
+                <button class="outline-button" id="controls-help" type="button">عرض الاختصارات <span class="icon icon-arrow-left"></span></button>
+              </div>
+
+              <div class="insight-card drop-card" id="drop-zone">
+                <span class="drop-icon"><span class="icon icon-upload"></span></span>
+                <strong>اسحب لعبتك هنا</strong>
+                <small>يدعم ملفات NES و iNES</small>
+                <span class="drop-line"><i></i><span>أو</span><i></i></span>
+                <button class="link-button" id="drop-import" type="button">تصفح الملفات <span class="icon icon-arrow-left"></span></button>
+              </div>
+            </aside>
+          </section>
+
+          <footer class="workspace-footer"><span>NX-EMULATOR / LOCAL-FIRST PLAYER</span><span><i class="footer-dot"></i> لا يوجد اتصال مطلوب أثناء اللعب</span></footer>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal-backdrop is-hidden" id="info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="info-modal">
+        <button class="modal-close" id="modal-close" type="button" aria-label="إغلاق"><span class="icon icon-close"></span></button>
+        <span class="modal-kicker">NX-EMULATOR / LOCAL-FIRST</span>
+        <h2 id="modal-title">ذكرياتك، على جهازك.</h2>
+        <p>هذا المشغل يستخدم نواة JSNES مضمّنة داخل الحزمة. ملفات الألعاب لا تغادر المتصفح ولا تُرفع إلى أي خادم. عند استيراد لعبة، يمكن حفظ نسخة محلية منها في مكتبة هذا المتصفح لتشغيلها مرة أخرى بدون إنترنت.</p>
+        <div class="modal-facts"><span><b>01</b> Offline by default</span><span><b>02</b> Private local library</span><span><b>03</b> Built for expansion</span></div>
+      </div>
+    </div>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+  </body>
+</html>
