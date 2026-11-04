@@ -7,7 +7,9 @@ const APP_SHELL = [
   new URL('./icon.svg', base).toString(),
   new URL('./icon-192.png', base).toString(),
   new URL('./icon-512.png', base).toString(),
-  new URL('./manus-routes.json', base).toString()
+  new URL('./manus-routes.json', base).toString(),
+  new URL('./assets/index-CuOEx-5t.js', base).toString(),
+  new URL('./assets/index-BaVbrRIZ.css', base).toString()
 ];
 
 self.addEventListener('install', (event) => {
@@ -27,6 +29,8 @@ self.addEventListener('fetch', (event) => {
       const copy = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
       return response;
-    }).catch(() => caches.match(new URL('./index.html', self.registration.scope).toString())))
+    }).catch(() => event.request.destination === 'document'
+      ? caches.match(new URL('./index.html', self.registration.scope).toString())
+      : Promise.reject(new Error('Offline asset is not cached'))))
   );
 });
