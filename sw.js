@@ -1,36 +1,34 @@
-const CACHE_NAME = 'nx-emulator-shell-v1-1';
+const CACHE_NAME = 'nx-emulator-shell-v2';
 const base = self.registration.scope;
-const APP_SHELL = [
-  base,
-  new URL('./index.html', base).toString(),
-  new URL('./manifest.webmanifest', base).toString(),
-  new URL('./icon.svg', base).toString(),
-  new URL('./icon-192.png', base).toString(),
-  new URL('./icon-512.png', base).toString(),
-  new URL('./manus-routes.json', base).toString(),
-  new URL('./assets/index-CuOEx-5t.js', base).toString(),
-  new URL('./assets/index-BaVbrRIZ.css', base).toString()
-];
+const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'].map((p) => new URL(p, base).toString());
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const results = await Promise.allSettled(APP_SHELL.map((u) => cache.add(u)));
+    results.forEach((r, i) => { if (r.status === 'rejected') console.error('[SW] failed to cache', APP_SHELL[i], r.reason); });
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-      return response;
-    }).catch(() => event.request.destination === 'document'
-      ? caches.match(new URL('./index.html', self.registration.scope).toString())
-      : Promise.reject(new Error('Offline asset is not cached'))))
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request, { ignoreSearch: true });
+    const net = fetch(event.request).then((res) => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE_NAME).then((c) => c.put(event.request, copy)); }
+      return res;
+    }).catch(() => null);
+    if (cached) { event.waitUntil(net); return cached; }
+    const res = await net;
+    if (res) return res;
+    if (event.request.mode === 'navigate') return (await caches.match(new URL('./index.html', base).toString())) || Response.error();
+    return Response.error();
+  })());
 });
