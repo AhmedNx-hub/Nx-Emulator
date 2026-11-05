@@ -5,7 +5,7 @@ const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg',
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const results = await Promise.allSettled(APP_SHELL.map((u) => cache.add(u)));
+    const results = await Promise.allSettled(APP_SHELL.map((u) => cache.add(new Request(u, { cache: 'reload' }))));
     results.forEach((r, i) => { if (r.status === 'rejected') console.error('[SW] failed to cache', APP_SHELL[i], r.reason); });
     await self.skipWaiting();
   })());
@@ -19,16 +19,23 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  const isPage = event.request.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/');
   event.respondWith((async () => {
+    if (isPage) {
+      try {
+        const res = await fetch(event.request, { cache: 'no-store' });
+        if (res && res.ok) { const copy = res.clone(); caches.open(CACHE_NAME).then((c) => c.put(event.request, copy)); }
+        return res;
+      } catch (e) {
+        return (await caches.match(event.request, { ignoreSearch: true })) || (await caches.match(new URL('./index.html', base).toString())) || Response.error();
+      }
+    }
     const cached = await caches.match(event.request, { ignoreSearch: true });
     const net = fetch(event.request).then((res) => {
       if (res && res.ok) { const copy = res.clone(); caches.open(CACHE_NAME).then((c) => c.put(event.request, copy)); }
       return res;
     }).catch(() => null);
     if (cached) { event.waitUntil(net); return cached; }
-    const res = await net;
-    if (res) return res;
-    if (event.request.mode === 'navigate') return (await caches.match(new URL('./index.html', base).toString())) || Response.error();
-    return Response.error();
+    return (await net) || Response.error();
   })());
 });
