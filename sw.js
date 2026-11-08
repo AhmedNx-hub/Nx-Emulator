@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nx-emulator-shell-v3';
+const CACHE_NAME = 'nx-emulator-shell-v4';
 const base = self.registration.scope;
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'].map((p) => new URL(p, base).toString());
 
