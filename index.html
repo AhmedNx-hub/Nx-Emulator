@@ -136,7 +136,7 @@ navigator.serviceWorker?.ready.then(()=>setTimeout(Ce,500)).catch(()=>{});
 _t.multiple=true;_t.accept=".nes,.nes2,.unf,.zip";
 
 const hud=document.createElement("div");hud.style.cssText="position:fixed;top:4px;left:4px;z-index:99;font:11px monospace;color:#0f0;background:#0008;padding:2px 6px;border-radius:6px;display:none;pointer-events:none";document.body.append(hud);let nxFc=0,nxWt=0,nxMx=0,nxT0=performance.now();const nxG=Si.prototype.generateFrame;Si.prototype.generateFrame=function(){window.__nxFrameHook?.();const s=performance.now();nxG.call(this);const n=performance.now();nxWt+=n-s;nxMx=Math.max(nxMx,n-s);window.__nxCost=(window.__nxCost||n-s)*.9+(n-s)*.1;nxFc++;if(n-nxT0>=1000){if(NXP.fps)hud.textContent=`${nxFc} fps · ${(nxWt/nxFc).toFixed(1)}ms avg · ${nxMx.toFixed(0)}ms max`;nxFc=0;nxWt=0;nxMx=0;nxT0=n}};
-let NXG={aspect:"native",integer:NXP.integer,crt:NXP.crt,rewind:0};const nxDisp=()=>{At.classList.toggle("nx-crt",!!NXG.crt);hud.style.display=NXP.fps?"block":"none";C?.fitInParent()};
+let NXG={aspect:"native",integer:NXP.integer,crt:NXP.crt,rewind:0};const nxDisp=()=>{At.classList.toggle("nx-crt",!!NXG.crt);hud.style.display=NXP.fps?"block":"none";document.documentElement.style.setProperty("--nx-ar",{native:1.0667,"4:3":1.3333,"16:9":1.7778,fill:1.0667}[NXG.aspect||"native"]);C?.fitInParent()};
 if(typeof Ai.prototype.fitInParent==="function"){const f=Ai.prototype.fitInParent;Ai.prototype.fitInParent=function(){f.call(this);const c=this._screen?.canvas,p=c?.parentElement?.parentElement;if(!c||!p)return;const m=NXG.aspect||"native";if(m==="native"&&!NXG.integer)return;const cs=getComputedStyle(p),W=p.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),H2=p.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);if(W<=0||H2<=0)return;const r={native:256/240,"4:3":4/3,"16:9":16/9,fill:W/H2}[m]||256/240;let w=Math.min(W,H2*r),h=w/r;if(NXG.integer){const k=Math.floor(w/c.width);if(k>=1&&c.width*k>=w*.8){w=c.width*k;h=w/r}}c.style.width=w+"px";c.style.height=h+"px"}}
 nxDisp();
 
@@ -234,18 +234,18 @@ function nxGameInit(){let g={};try{g=JSON.parse(localStorage.getItem(nxGKey())||
 const nxOri=()=>matchMedia("(orientation:portrait)").matches?"p":"l";
 const nxLK=g=>`nx-lay:${g?"*":(Z?.id||"")}:${nxOri()}`;
 const nxGroups=()=>{const d=document.querySelector(".touch-deck"),c=document.querySelector('[data-button="select"]')?.parentElement,ctr=c&&c!==d?c:null;if(ctr)ctr.classList.add("nx-ctr");return{dpad:document.querySelector(".touch-dpad"),ab:document.querySelector(".touch-ab"),ctr}};
-let nxLay={},nxSel="dpad",nxEd=false,nxWas=false;
+let nxLay={},nxSel="dpad",nxEd=false,nxWas=false,nxPv=false;function nxPrev(){nxPv=!nxPv;document.body.classList.toggle("nx-editing",!nxPv);const b=nxBar.querySelector('[data-e="preview"]');b.textContent=nxPv?"رجوع للتعديل":"معاينة";b.classList.toggle("on",nxPv);if(C){if(nxPv&&H)bt.click();else if(!nxPv&&!H)bt.click()}}
 function nxApplyLayout(){let L={};try{L=JSON.parse(localStorage.getItem(nxLK(0))||localStorage.getItem(nxLK(1))||"{}")}catch{}nxLay=L;const G=nxGroups();for(const k in G){const el=G[k],v=L[k];if(!el)continue;el.style.translate=v?`${v.x||0}px ${v.y||0}px`:"";el.style.scale=v&&v.s?v.s:"";el.style.opacity=v&&v.o!==undefined?v.o:""}}
 matchMedia("(orientation:portrait)").addEventListener?.("change",()=>setTimeout(nxApplyLayout,150));
-const nxBar=document.createElement("div");nxBar.id="nx-edbar";nxBar.hidden=true;nxBar.innerHTML='<div class="nxe-t">اسحب أي مجموعة أزرار لتحريكها <b id="nx-edname"></b></div><label>الحجم<input type="range" id="nx-sz" min="60" max="180" step="5"></label><label>الشفافية<input type="range" id="nx-op" min="20" max="100" step="5"></label><div class="nxe-b"><button type="button" data-e="reset">إعادة ضبط</button><button type="button" data-e="all">حفظ للكل</button><button type="button" data-e="done" class="pri">تم</button></div>';document.body.append(nxBar);
+const nxBar=document.createElement("div");nxBar.id="nx-edbar";nxBar.hidden=true;nxBar.innerHTML='<div class="nxe-t">اسحب أي مجموعة أزرار لتحريكها <b id="nx-edname"></b></div><label>الحجم<input type="range" id="nx-sz" min="60" max="180" step="5"></label><label>الشفافية<input type="range" id="nx-op" min="20" max="100" step="5"></label><div class="nxe-b"><button type="button" data-e="preview">معاينة</button><button type="button" data-e="reset">إعادة ضبط</button><button type="button" data-e="all">حفظ للكل</button><button type="button" data-e="done" class="pri">تم</button></div>';document.body.append(nxBar);
 const NXN={dpad:"الاتجاهات",ab:"A / B",ctr:"Select / Start"};
 function nxSelect(k){nxSel=k;const G=nxGroups(),v=nxLay[k]||{};for(const x in G)G[x]?.classList.toggle("nx-selg",x===k);nxBar.querySelector("#nx-edname").textContent="— "+NXN[k];nxBar.querySelector("#nx-sz").value=Math.round((v.s||1)*100);nxBar.querySelector("#nx-op").value=Math.round((v.o===undefined?1:v.o)*100)}
 function nxSet(k,p){nxLay[k]={...(nxLay[k]||{}),...p};const el=nxGroups()[k],v=nxLay[k];if(el){el.style.translate=`${v.x||0}px ${v.y||0}px`;if(v.s)el.style.scale=v.s;if(v.o!==undefined)el.style.opacity=v.o}}
-function nxEdit(on){nxEd=on;document.body.classList.toggle("nx-editing",on);nxBar.hidden=!on;if(on){nxWas=!H;if(nxWas)bt.click();nxSelect(nxGroups()[nxSel]?nxSel:"dpad")}else{for(const x in nxGroups())nxGroups()[x]?.classList.remove("nx-selg");if(nxWas&&C&&H)bt.click();nxWas=false}}
-(()=>{const G=nxGroups();for(const k in G){const el=G[k];if(!el)continue;let st=null;el.addEventListener("pointerdown",e=>{if(!nxEd)return;e.preventDefault();e.stopPropagation();el.setPointerCapture?.(e.pointerId);nxSelect(k);const v=nxLay[k]||{};st={x:e.clientX,y:e.clientY,ox:v.x||0,oy:v.y||0}});el.addEventListener("pointermove",e=>{if(!nxEd||!st)return;nxSet(k,{x:Math.round(st.ox+e.clientX-st.x),y:Math.round(st.oy+e.clientY-st.y)})});["pointerup","pointercancel"].forEach(t=>el.addEventListener(t,()=>{st=null}))}})();
+function nxEdit(on){nxEd=on;nxPv=false;const pb=nxBar.querySelector('[data-e="preview"]');if(pb){pb.textContent="معاينة";pb.classList.remove("on")}document.body.classList.toggle("nx-editing",on);nxBar.hidden=!on;if(on){nxWas=!H;if(nxWas)bt.click();nxSelect(nxGroups()[nxSel]?nxSel:"dpad")}else{for(const x in nxGroups())nxGroups()[x]?.classList.remove("nx-selg");if(nxWas&&C&&H)bt.click();nxWas=false}}
+(()=>{const G=nxGroups();for(const k in G){const el=G[k];if(!el)continue;let st=null;el.addEventListener("pointerdown",e=>{if(!nxEd||nxPv)return;e.preventDefault();e.stopPropagation();el.setPointerCapture?.(e.pointerId);nxSelect(k);const v=nxLay[k]||{};st={x:e.clientX,y:e.clientY,ox:v.x||0,oy:v.y||0}});el.addEventListener("pointermove",e=>{if(!nxEd||!st)return;nxSet(k,{x:Math.round(st.ox+e.clientX-st.x),y:Math.round(st.oy+e.clientY-st.y)})});["pointerup","pointercancel"].forEach(t=>el.addEventListener(t,()=>{st=null}))}})();
 nxBar.querySelector("#nx-sz").addEventListener("input",e=>nxSet(nxSel,{s:e.target.value/100}));
 nxBar.querySelector("#nx-op").addEventListener("input",e=>nxSet(nxSel,{o:e.target.value/100}));
-nxBar.addEventListener("click",e=>{const b=e.target.closest("[data-e]");if(!b)return;const a=b.dataset.e;if(a==="reset"){nxLay={};localStorage.removeItem(nxLK(0));nxApplyLayout();nxSelect(nxSel)}else{const j=JSON.stringify(nxLay);localStorage.setItem(nxLK(0),j);if(a==="all")localStorage.setItem(nxLK(1),j);P(a==="all"?"اتحفظ ترتيب الأزرار لكل الألعاب":"اتحفظ ترتيب الأزرار للعبة دي","success");nxEdit(false)}});
+nxBar.addEventListener("click",e=>{const b=e.target.closest("[data-e]");if(!b)return;const a=b.dataset.e;if(a==="preview"){nxPrev();return}if(a==="reset"){nxLay={};localStorage.removeItem(nxLK(0));nxApplyLayout();nxSelect(nxSel)}else{const j=JSON.stringify(nxLay);localStorage.setItem(nxLK(0),j);if(a==="all")localStorage.setItem(nxLK(1),j);P(a==="all"?"اتحفظ ترتيب الأزرار لكل الألعاب":"اتحفظ ترتيب الأزرار للعبة دي","success");nxEdit(false)}});
 // ---- in-game menu ----
 const nxMenu=document.createElement("div");nxMenu.id="nx-menu";nxMenu.hidden=true;
 const NXT=[["save","icon-save","حفظ"],["load","icon-folder","تحميل"],["slot","","الخانة"],["mute","icon-volume","كتم"],["ff","icon-bolt","تسريع"],["rw","icon-rewind","Rewind"],["cheats","icon-code","أكواد"],["aspect","icon-expand","النسبة"],["crt","icon-chip","CRT"],["integer","icon-expand","أعداد صحيحة"],["layout","icon-edit","تعديل الأزرار"],["reset","icon-reset","إعادة"],["fps","icon-info","FPS"],["exit","icon-close","خروج"]];
@@ -272,6 +272,7 @@ else if(a==="cheats"){nxGrid.hidden=true;nxCh.hidden=false;nxCheatsRender()}
 nxMenuSync()});
 nxCh.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;const c=b.dataset.c,l=nxCodes();if(c==="back"){nxCh.hidden=true;nxGrid.hidden=false}else if(c==="add"){const v=nxCh.querySelector("#nxc-in").value.toUpperCase().replace(/[^A-Z]/g,"");if(!v)return;try{C.nes.gameGenie.addCode(v)}catch{P("كود غير صالح","danger");return}l.push({code:v,on:true});localStorage.setItem(nxCK(),JSON.stringify(l));nxCheatsApply();nxCheatsRender()}else if(c==="del"){l.splice(+b.dataset.i,1);localStorage.setItem(nxCK(),JSON.stringify(l));nxCheatsApply();nxCheatsRender()}});
 nxCh.addEventListener("change",e=>{const b=e.target.closest('[data-c="tog"]');if(!b)return;const l=nxCodes();l[+b.dataset.i].on=b.checked;localStorage.setItem(nxCK(),JSON.stringify(l));nxCheatsApply()});
+["contextmenu","selectstart"].forEach(t=>document.addEventListener(t,e=>{const el=e.target&&e.target.nodeType===1?e.target:e.target&&e.target.parentElement;if(document.body.classList.contains("nx-has-game")&&!(el&&el.closest("input,textarea")))e.preventDefault()},true));
 })();
 
 xe();Qi();tr();er();sr();Ji();Wi();Jt();Ce();fs();"serviceWorker"in navigator&&navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(e=>console.error("SW registration failed",e));
@@ -393,6 +394,23 @@ html.is-game-fullscreen #nx-menu-btn{display:grid}body.nx-editing #nx-menu-btn{d
 #nx-sort{height:42px;border-radius:14px;background:var(--surface-soft);border:1px solid var(--line-soft);color:#fff;padding:0 10px}
 .nx-padlist{font-size:12px;color:var(--muted);margin:6px 0 12px}.nx-padgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
 .nx-padgrid button{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:12px;background:var(--surface-soft);color:#fff;border:1px solid var(--line-soft);font-size:11px}
+</style><style id="nx-ui5">
+html,body{overflow-x:clip;max-width:100vw}#app-shell{max-width:100vw;overflow-x:clip}
+html.is-game-fullscreen *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent;-webkit-user-drag:none}
+html.is-game-fullscreen input,html.is-game-fullscreen textarea{-webkit-user-select:text!important;user-select:text!important}
+.touch-deck,.touch-deck *,.nx-turbo,.nx-rw,#nx-menu-btn{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.nx-editing .touch-deck{display:flex!important;opacity:1!important;visibility:visible!important}
+.nxe-b .on{background:linear-gradient(135deg,#22d3ee,#0e7490);border:0;color:#04121a}
+#nx-edbar{padding:10px;gap:6px}
+@media(orientation:portrait){
+html.is-game-fullscreen .player-column{position:fixed;inset:0;z-index:50;width:100%;height:100dvh;min-height:0;padding:0;background:#05060d;overflow:hidden}
+html.is-game-fullscreen .player-card{display:flex!important;flex-direction:column;position:relative;width:100%;height:100%;min-height:0;max-height:none;padding:0;background:#05060d;border:0;border-radius:0}
+html.is-game-fullscreen .screen-frame{flex:0 0 auto;width:100%;height:calc(100vw / var(--nx-ar,1.0667));max-height:60dvh;margin-top:max(54px,calc(env(safe-area-inset-top) + 46px));padding:0;border:0;border-radius:0;background:#000;display:grid;place-items:center}
+html.is-game-fullscreen .touch-deck{position:relative!important;inset:auto!important;bottom:auto!important;transform:none;flex:1 1 auto;width:100%;height:auto!important;min-height:0!important;display:grid!important;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto;align-items:center;justify-items:center;gap:6px;padding:8px 14px calc(14px + env(safe-area-inset-bottom))}
+html.is-game-fullscreen .touch-dpad{grid-column:1;grid-row:1;position:relative!important;inset:auto!important}
+html.is-game-fullscreen .touch-ab{grid-column:2;grid-row:1;position:relative!important;inset:auto!important}
+html.is-game-fullscreen .nx-ctr{grid-column:1/-1;grid-row:2;position:relative!important;inset:auto!important}
+}
 </style></head>
   <body>
     <div id="app-shell">
